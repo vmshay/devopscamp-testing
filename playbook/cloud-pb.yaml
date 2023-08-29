@@ -1,0 +1,53 @@
+- name: CloudCamp playbook
+  hosts: all
+  become: yes
+  vars:
+    key: "{{ lookup('file', './cloudru.pub') }}"
+
+
+  handlers:
+    - name: restart sshd
+      service:
+        name: sshd
+        state: restarted
+
+
+  tasks:
+   - name: Create user 'cloudru'
+     user:
+       name: cloudru
+       shell: /bin/bash
+       home: /home/cloudru
+       password: '$6$32c8sZ619dY8bmvl$pxx4isKUG2Ld/VhxWaXXjkk7ublFq/wnGw1fH3myxD.ukO74gL9.OVE1TeV5w/5v30/4zGjolYe/SFQb7MtBT.'
+     tags:
+       - user
+
+
+   - name: Disable root login
+     ansible.builtin.lineinfile:
+       path: /etc/ssh/sshd_config
+       regexp: '^#?PermitRoot'
+       line: 'PermitRootLogin no'
+       state: present
+     notify:
+       - restart sshd
+     tags:
+       - permit-config
+
+
+   - name: Allow SSH login by key
+     ansible.builtin.lineinfile:
+       path: '/etc/ssh/sshd_config'
+       regexp: '^#?PubkeyAuthentication'
+       line: 'PubkeyAuthentication yes'
+       state: present
+     notify:
+       - restart sshd
+     tags:
+       - key-config
+
+
+   - name: Copy public key for cloudru user
+     ansible.posix.authorized_key:
+       user: cloudru
+       key: '{{ key }}'
