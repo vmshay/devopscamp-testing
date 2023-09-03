@@ -1,0 +1,6 @@
+image:
+  name: vmsay-app
+
+replicaCount: 3
+
+author: "Vildan Shaymagsumov"

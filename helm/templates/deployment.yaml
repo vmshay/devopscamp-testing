@@ -1,0 +1,59 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: cloudru
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: vmshay-app-deployment
+  namespace: cloudru  
+spec:
+  replicas: {{ .Values.replicacount }}}
+  selector:
+    matchLabels:
+      app: vmshay-app
+  template:
+    metadata:
+      labels:
+        app: vmshay-app
+    spec:
+      containers:
+        - name: {{ .Values.image.name }}
+          image: vmshay/cloud-app:latest
+          ports:
+            - containerPort: 8000
+          env:
+            - name: AUTHOR
+              value: {{ .Values.author }}
+            - name: UID
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.uid
+          readinessProbe:
+            httpGet:
+              path: /id
+              port: 8000
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /id
+              port: 8000
+            initialDelaySeconds: 15
+            periodSeconds: 20
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: vmshay-app-service
+  namespace: cloud 
+spec:
+  selector:
+    app: simple-app
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 8000
+  type: ClusterIP
+
