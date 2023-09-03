@@ -19,8 +19,8 @@ spec:
         app: vmshay-app
     spec:
       containers:
-        - name: {{ .Values.image.name }}
-          image: vmshay/cloud-app:latest
+        - name: vmshay-app
+          image: "{{ .Values.image.name }}:{{ .Values.image.version }}"
           ports:
             - containerPort: 8000
           env:
