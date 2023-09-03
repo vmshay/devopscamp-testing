@@ -1,5 +1,6 @@
 image:
-  name: vmsay-app
+  name: vmsay/cloud-app
+  version: latest
 
 replicaCount: 3
 
